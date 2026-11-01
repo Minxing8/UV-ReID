@@ -21,11 +21,29 @@ UV-ReID has four parts: a frozen DINOv2 image encoder (Base or Large), a lightwe
 1. **Canonical texture pretraining.** The transformer is pretrained on HuGe100K with multi-view texture reconstruction. Each predicted UV texture is rendered and supervised from several viewpoints.
 2. **ReID fine-tuning.** Standard identity losses are combined with multi-view texture objectives that keep the canonical structure. A text-conditioned Multi-Space Multi-View loss extends this to multimodal and cross-domain settings.
 
+### UV Decoder
+
 <p align="center">
   <img src="assets/fig2_uv_decoder.png" width="700"/>
 </p>
 
 During training, the UV decoder predicts three outputs. A texture flow samples detailed visible regions from the input image. An RGB map captures global appearance. A fusion mask combines the two into the final UV map. The decoder is used only for supervision and is removed at inference.
+
+### Degradation Augmentations
+
+<p align="center">
+  <img src="assets/fig3_degradations.png" width="700"/>
+</p>
+
+After clean pretraining, a second stage replaces each input with a degraded version with probability 0.5. The degradations are JPEG compression, Gaussian noise, Gaussian blur, pixelation, close zoom-ins on body regions, or combinations of these. The targets stay the original high-quality views, so the model learns to recover the complete UV texture from partial or corrupted input. The image in the green box has no augmentation.
+
+### Multi-Space Multi-View Loss
+
+<p align="center">
+  <img src="assets/fig4_msmv_loss.png" width="800"/>
+</p>
+
+The full pipeline with the Multi-Space Multi-View loss. Three independent passes through the network produce $q_1$, $g$ and $g_T$ from the inputs $Q_1$, $G$ and $G+T$, where $T$ is a conditioning text. The loss aligns the text-conditioned gallery embedding $g_T$ with the query embedding $q_1$. A second query view $Q_2$ provides multi-view supervision.
 
 ## Code and Models
 
